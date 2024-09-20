@@ -48,6 +48,28 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
+    const roomsCollection = client.db("stay_scape").collection("rooms");
+
+    // get the rooms data
+    app.get("/rooms", async (req, res) => {
+      const category = req.query.category;
+      // console.log(category);
+      let query = {};
+      if (category && category !== 'null') {
+        query = { category: category };
+      }
+      const result = await roomsCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // get single room data
+    app.get("/room/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await roomsCollection.findOne(query);
+      res.send(result);
+    });
+
     // auth related api
     app.post("/jwt", async (req, res) => {
       const user = req.body;
@@ -62,6 +84,7 @@ async function run() {
         })
         .send({ success: true });
     });
+
     // Logout
     app.get("/logout", async (req, res) => {
       try {

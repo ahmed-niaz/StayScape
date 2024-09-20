@@ -1,25 +1,34 @@
-import { useEffect, useState } from "react";
-
 import Container from "../shared/Container";
 import Loader from "./../shared/Loader";
 import Heading from "../shared/Heading";
 import Card from "./Card";
+import { useQuery } from "@tanstack/react-query";
+import { axiosCommon } from "../../hooks/useAxiosCommon";
+import { useSearchParams } from "react-router-dom";
 
 const Rooms = () => {
-  const [rooms, setRooms] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [params, ] = useSearchParams();
+  const category = params.get("category");
+  // console.log("From room", category);
+  const { data: rooms = [], isLoading } = useQuery({
+    queryKey: ["rooms", category],
+    queryFn: async () => {
+      const { data } = await axiosCommon.get(`/rooms?category=${category}`);
+      return data;
+    },
+  });
 
-  useEffect(() => {
-    setLoading(true);
-    fetch(`./rooms.json`)
-      .then((res) => res.json())
-      .then((data) => {
-        setRooms(data);
-        setLoading(false);
-      });
-  }, []);
+  // useEffect(() => {
+  //   setLoading(true);
+  //   fetch(`http://localhost:3000/rooms`)
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       setRooms(data);
+  //       setLoading(false);
+  //     });
+  // }, []);
 
-  if (loading) return <Loader />;
+  if (isLoading) return <Loader />;
 
   return (
     <Container>
