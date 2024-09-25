@@ -1,12 +1,14 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import useAuth from "./../../hooks/useAuth";
-import axios from "axios";
 import toast from "react-hot-toast";
 import { TbFidgetSpinner } from "react-icons/tb";
+import { uploadImage } from "../../api/utils";
 
 const Register = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location?.state || "/";
   const {
     createUser,
     loginWithGoogle,
@@ -23,28 +25,30 @@ const Register = () => {
     const password = form.password.value;
 
     const image = form.image.files[0];
-    const formData = new FormData();
-    formData.append("image", image);
+    // const formData = new FormData();
+    // formData.append("image", image);
 
     try {
       setLoading(true);
       // upload image and get the i_url
-      const { data } = await axios.post(
-        `https://api.imgbb.com/1/upload?key=${
-          import.meta.env.VITE_IMGBB_API_KEY
-        }`,
-        formData
-      );
+      // const { data } = await axios.post(
+      //   `https://api.imgbb.com/1/upload?key=${
+      //     import.meta.env.VITE_IMGBB_API_KEY
+      //   }`,
+      //   formData
+      // );
 
-      console.log(data.data.display_url);
+      // console.log(data.data.display_url);
+      const image_url = await uploadImage(image);
+      console.log(image_url);
 
       // user registration
       const result = await createUser(email, password);
       console.log(result);
 
       // update username & photo
-      await updateUserProfile(name, data.data.display_url);
-      navigate("/");
+      await updateUserProfile(name, image_url);
+      navigate(from);
       toast.success("login successful");
     } catch (err) {
       console.log(err);
@@ -56,7 +60,7 @@ const Register = () => {
   const handleGoogleLogin = async () => {
     try {
       await loginWithGoogle();
-      navigate("/");
+      navigate(from);
       toast.success("login successful");
     } catch (err) {
       console.log(err);
