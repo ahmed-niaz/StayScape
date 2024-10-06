@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { categories } from "../categories/CategoryData";
 import "react-date-range/dist/styles.css"; // main css file
 import "react-date-range/dist/theme/default.css"; // theme css file
+import { TbFidgetSpinner } from "react-icons/tb";
 
 const AddRoomForm = ({
   dates,
@@ -11,6 +12,7 @@ const AddRoomForm = ({
   imagePreview,
   handleImage,
   imageText,
+  loading,
 }) => {
   return (
     <div className="w-full min-h-[calc(100vh-40px)] flex flex-col justify-center items-center text-gray-800 rounded-xl bg-gray-50">
@@ -100,7 +102,7 @@ const AddRoomForm = ({
                   </label>
                 </div>
               </div>
-              <div className="h-16 w-16 object-cover overflow-hidden">
+              <div className="h-16 w-16 object-cover overflow-hidden flex items-center">
                 {imagePreview && (
                   <img className="rounded-md" src={imagePreview} />
                 )}
@@ -181,10 +183,15 @@ const AddRoomForm = ({
         </div>
 
         <button
+          disabled={loading}
           type="submit"
           className="w-full p-3 mt-5 text-center font-medium text-white transition duration-200 rounded shadow-md bg-rose-500"
         >
-          Save & Continue
+          {loading ? (
+            <TbFidgetSpinner className="animate-spin m-auto" />
+          ) : (
+            "Save & Continue"
+          )}
         </button>
       </form>
     </div>
@@ -202,6 +209,7 @@ AddRoomForm.propTypes = {
   imagePreview: PropTypes.string,
   handleImage: PropTypes.func.isRequired,
   imageText: PropTypes.string.isRequired,
+  loading: PropTypes.bool,
 };
 
 export default AddRoomForm;

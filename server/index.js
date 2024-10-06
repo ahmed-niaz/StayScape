@@ -3,7 +3,12 @@ const app = express();
 require("dotenv").config();
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const {
+  MongoClient,
+  ServerApiVersion,
+  ObjectId,
+  Timestamp,
+} = require("mongodb");
 const jwt = require("jsonwebtoken");
 
 const port = process.env.PORT || 3000;
@@ -49,26 +54,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     const roomsCollection = client.db("stay_scape").collection("rooms");
-
-    // get the rooms data
-    app.get("/rooms", async (req, res) => {
-      const category = req.query.category;
-      // console.log(category);
-      let query = {};
-      if (category && category !== 'null') {
-        query = { category: category };
-      }
-      const result = await roomsCollection.find(query).toArray();
-      res.send(result);
-    });
-
-    // get single room data
-    app.get("/room/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await roomsCollection.findOne(query);
-      res.send(result);
-    });
+    const usersCollection = client.db("stay_scape").collection("users");
 
     // auth related api
     app.post("/jwt", async (req, res) => {
@@ -99,6 +85,95 @@ async function run() {
       } catch (err) {
         res.status(500).send(err);
       }
+    });
+    // get the rooms data
+    app.get("/rooms", async (req, res) => {
+      const category = req.query.category;
+      // console.log(category);
+      let query = {};
+      if (category && category !== "null") {
+        query = { category: category };
+      }
+      const result = await roomsCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // get single room data
+    app.get("/room/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await roomsCollection.findOne(query);
+      res.send(result);
+    });
+
+    // get all rooms for host
+    app.get("/my-listings/:email", async (req, res) => {
+      const email = req.params.email;
+      let query = { "host.email": email };
+      const result = await roomsCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // get all users from db
+    app.get("/users", async (req, res) => {
+      const result = await usersCollection.find().toArray();
+      res.send(result);
+    });
+
+    // DELETE
+
+    // delete a room
+    app.delete("/room/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await roomsCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // POST data
+
+    // save room data in db
+    app.post("/room", async (req, res) => {
+      const roomData = req.body;
+      const result = await roomsCollection.insertOne(roomData);
+      res.send(result);
+    });
+
+    // save user data in db
+    app.put("/user", async (req, res) => {
+      const user = req.body;
+      const query = {
+        email: user?.email,
+      };
+      // check if user already exist in db
+      const isExist = await usersCollection.findOne(query);
+
+      // if(isExist ) return res.send(isExist)
+      if (isExist) {
+        if (user?.status === "Requested") {
+          // if existing user try to change his role
+          const result = await usersCollection.updateOne(query, {
+            $set: { status: user?.status },
+          });
+
+          return res.send(result);
+        } else {
+          // if existing user login again
+          return res.send(isExist);
+        }
+      }
+
+      // save user for first time
+      const options = { upsert: true };
+
+      const updateDoc = {
+        $set: {
+          ...user,
+          timestamp: Date.now(),
+        },
+      };
+      const result = await usersCollection.updateOne(query, updateDoc, options);
+      res.send(result);
     });
 
     // Send a ping to confirm a successful connection
