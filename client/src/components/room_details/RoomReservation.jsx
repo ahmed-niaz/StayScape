@@ -5,7 +5,12 @@ import "react-date-range/dist/theme/default.css"; // theme css file
 import { DateRange } from "react-date-range";
 import { useState } from "react";
 import { differenceInCalendarDays } from "date-fns";
-const RoomReservation = ({ room }) => {
+import BookingModal from "../modal/BookingModal";
+import useAuth from "../../hooks/useAuth";
+
+const RoomReservation = ({ room, refetch }) => {
+  const { user } = useAuth();
+  const [isOpen, setIsOpen] = useState(false);
   console.log(new Date(room.from).toLocaleDateString());
   console.log(new Date(room.to).toLocaleDateString());
   const [state, setState] = useState([
@@ -16,12 +21,16 @@ const RoomReservation = ({ room }) => {
     },
   ]);
 
-  // total days * price
+  const closeModal = () => {
+    setIsOpen(false);
+  };
 
-  const totalPrice = parseInt(
-    differenceInCalendarDays(new Date(room.to), new Date(room.from))
-  ) * room?.price;
+  // total days * price
+  const totalPrice =
+    parseInt(differenceInCalendarDays(new Date(room.to), new Date(room.from))) *
+    room?.price;
   console.log(totalPrice);
+
   return (
     <div className="rounded-xl border-[1px] border-neutral-200 overflow-hidden bg-white">
       <div className="flex items-center gap-1 p-4">
@@ -34,7 +43,7 @@ const RoomReservation = ({ room }) => {
         <DateRange
           showDateDisplay={false}
           rangeColors={["#F6536D"]}
-          onChange={(item) =>
+          onChange={() =>
             setState([
               {
                 startDate: new Date(room.from),
@@ -49,8 +58,27 @@ const RoomReservation = ({ room }) => {
       </div>
       <hr />
       <div className="p-4">
-        <Button label={"Reserve"} />
+        <Button
+          disabled={room?.booked === true}
+          onClick={() => setIsOpen(true)}
+          label={room?.booked === true ? 'Booked':"Reserve"}
+        />
       </div>
+      {/* Modal */}
+      <BookingModal
+        closeModal={closeModal}
+        refetch={refetch}
+        isOpen={isOpen}
+        bookingInfo={{
+          ...room,
+          price: totalPrice,
+          guest: {
+            name: user?.displayName,
+            email: user?.email,
+            image: user?.photoURL,
+          },
+        }}
+      />
       <hr />
       <div className="p-4 flex items-center justify-between font-semibold text-lg">
         <div>Total</div>
@@ -62,6 +90,7 @@ const RoomReservation = ({ room }) => {
 
 RoomReservation.propTypes = {
   room: PropTypes.object,
+  refetch: PropTypes.func,
 };
 
 export default RoomReservation;

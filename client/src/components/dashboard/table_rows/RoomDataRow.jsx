@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { format } from "date-fns";
-import DeleteModal from "../../../modal/DeleteModal";
+import DeleteModal from "../../modal/DeleteModal";
 import { useState } from "react";
 
 const RoomDataRow = ({ room, refetch, handleDelete }) => {

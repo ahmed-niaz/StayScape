@@ -10,6 +10,12 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import Statistics from "../pages/dashboard/common/Statistics";
 import MyListings from "../pages/dashboard/host/MyListings";
 import AddRoom from "../pages/dashboard/host/AddRoom";
+import Profile from "../pages/dashboard/common/Profile";
+import ManageUsers from "../pages/dashboard/admin/ManageUsers";
+import AdminRoute from "./AdminRoute";
+import HostRoute from "./HostRoute";
+import MyBookings from "../pages/dashboard/guest/MyBookings";
+import ManageBookings from "../pages/dashboard/host/ManageBookings";
 
 export const router = createBrowserRouter([
   {
@@ -35,19 +41,77 @@ export const router = createBrowserRouter([
   { path: "/register", element: <Register /> },
   {
     path: "/dashboard",
-    element: <DashboardLayout />,
+    element: (
+      <ProtectedRoutes>
+        <DashboardLayout />
+      </ProtectedRoutes>
+    ),
     children: [
       {
         index: true,
-        element: <Statistics />,
+        element: (
+          <ProtectedRoutes>
+            <Statistics />
+          </ProtectedRoutes>
+        ),
       },
       {
         path: "my-listings",
-        element: <MyListings />,
+        element: (
+          <ProtectedRoutes>
+            <HostRoute>
+              {" "}
+              <MyListings />
+            </HostRoute>
+          </ProtectedRoutes>
+        ),
       },
       {
         path: "add-room",
-        element: <AddRoom />,
+        element: (
+          <ProtectedRoutes>
+            <HostRoute>
+              <AddRoom />
+            </HostRoute>
+          </ProtectedRoutes>
+        ),
+      },
+      {
+        path: "profile",
+        element: (
+          <ProtectedRoutes>
+            {" "}
+            <Profile />
+          </ProtectedRoutes>
+        ),
+      },
+      {
+        path: "manage-users",
+        element: (
+          <ProtectedRoutes>
+            <AdminRoute>
+              <ManageUsers />
+            </AdminRoute>
+          </ProtectedRoutes>
+        ),
+      },
+      {
+        path: "my-bookings",
+        element: (
+          <ProtectedRoutes>
+            <MyBookings />
+          </ProtectedRoutes>
+        ),
+      },
+      {
+        path: "manage-bookings",
+        element: (
+          <ProtectedRoutes>
+            <HostRoute>
+              <ManageBookings />
+            </HostRoute>
+          </ProtectedRoutes>
+        ),
       },
     ],
   },

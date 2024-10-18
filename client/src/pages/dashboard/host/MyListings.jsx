@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import useAxiosSecure from "./../../../hooks/useAxiosSecure";
 import useAuth from "../../../hooks/useAuth";
 import Loader from "../../../components/shared/Loader";
-import RoomDataRow from "../../../components/dashboard/navbar/table_rows/RoomDataRow";
+import RoomDataRow from "../../../components/dashboard/table_rows/RoomDataRow";
 import { toast } from "react-hot-toast";
 
 const MyListings = () => {

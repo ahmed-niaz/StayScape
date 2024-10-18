@@ -1,22 +1,36 @@
 import { useState } from "react";
 import { GrLogout } from "react-icons/gr";
 import { FcSettings } from "react-icons/fc";
-import { BsFillHouseAddFill } from "react-icons/bs";
+
 import { AiOutlineBars } from "react-icons/ai";
 import { BsGraphUp } from "react-icons/bs";
-import { NavLink } from "react-router-dom";
+
 import { Link } from "react-router-dom";
-import { MdHomeWork } from "react-icons/md";
+
 import useAuth from "../../hooks/useAuth";
 import logo from "./../../assets/icons/logo.png";
+import useRole from "../../hooks/useRole";
+import MenuItem from "./menu/MenuItem";
+import HostMenu from "./menu/HostMenu";
+import GuestMenu from "./menu/GuestMenu";
+import AdminMenu from "./menu/AdminMenu";
+import ToggleBtn from "../shared/button/ToggleBtn";
 
 const Sidebar = () => {
   const { logout } = useAuth();
   const [isActive, setActive] = useState(false);
-
+  const [role, isLoading] = useRole();
+  console.log(role, isLoading);
+  const [toggle, setToggle] = useState(true);
   // Sidebar Responsive Handler
   const handleToggle = () => {
     setActive(!isActive);
+  };
+
+  const toggleHandler = (event) => {
+    // console.log(event.target.checked);
+    setToggle(event.target.checked);
+    // setToggle(!toggle)
   };
   return (
     <>
@@ -68,50 +82,41 @@ const Sidebar = () => {
           {/* Nav Items */}
           <div className="flex flex-col justify-between flex-1 mt-6">
             {/* Conditional toggle button here.. */}
-
+            {role === "host" && (
+              <ToggleBtn toggleHandler={toggleHandler} toggle={toggle} />
+            )}
             {/*  Menu Items */}
             <nav>
               {/* Statistics */}
-              <NavLink
-                to="/dashboard"
-                end
-                className={({ isActive }) =>
-                  `flex items-center px-4 py-2 my-5  transition-colors duration-300 transform  hover:bg-gray-300   hover:text-gray-700 ${
-                    isActive ? "bg-gray-300  text-gray-700" : "text-gray-600"
-                  }`
-                }
-              >
-                <BsGraphUp className="w-5 h-5" />
-
-                <span className="mx-4 font-medium">Statistics</span>
-              </NavLink>
+              <MenuItem
+                label="Statistics"
+                address="/dashboard"
+                icon={BsGraphUp}
+              />
 
               {/* Add Room */}
-              <NavLink
-                to="add-room"
-                className={({ isActive }) =>
-                  `flex items-center px-4 py-2 my-5  transition-colors duration-300 transform  hover:bg-gray-300   hover:text-gray-700 ${
-                    isActive ? "bg-gray-300  text-gray-700" : "text-gray-600"
-                  }`
-                }
-              >
-                <BsFillHouseAddFill className="w-5 h-5" />
+              {/* <MenuItem
+                label="Add Room"
+                address="add-room"
+                icon={BsFillHouseAddFill}
+              /> */}
 
-                <span className="mx-4 font-medium">Add Room</span>
-              </NavLink>
               {/* My Listing */}
-              <NavLink
-                to="my-listings"
-                className={({ isActive }) =>
-                  `flex items-center px-4 py-2 my-5  transition-colors duration-300 transform  hover:bg-gray-300   hover:text-gray-700 ${
-                    isActive ? "bg-gray-300  text-gray-700" : "text-gray-600"
-                  }`
-                }
-              >
-                <MdHomeWork className="w-5 h-5" />
+              {/* <MenuItem
+                label="My Listings"
+                address="my-listings"
+                icon={MdHomeWork}
+              /> */}
 
-                <span className="mx-4 font-medium">My Listings</span>
-              </NavLink>
+              {role === "host" ? (
+                toggle ? (
+                  <HostMenu />
+                ) : (
+                  <GuestMenu />
+                )
+              ) : undefined}
+              {role === "guest" && <GuestMenu />}
+              {role === "admin" && <AdminMenu />}
             </nav>
           </div>
         </div>
@@ -120,18 +125,12 @@ const Sidebar = () => {
           <hr />
 
           {/* Profile Menu */}
-          <NavLink
-            to="/dashboard/profile"
-            className={({ isActive }) =>
-              `flex items-center px-4 py-2 my-5  transition-colors duration-300 transform  hover:bg-gray-300   hover:text-gray-700 ${
-                isActive ? "bg-gray-300  text-gray-700" : "text-gray-600"
-              }`
-            }
-          >
-            <FcSettings className="w-5 h-5" />
+          <MenuItem
+            label="Profile"
+            address="/dashboard/profile"
+            icon={FcSettings}
+          />
 
-            <span className="mx-4 font-medium">Profile</span>
-          </NavLink>
           <button
             onClick={logout}
             className="flex w-full items-center px-4 py-2 mt-5 text-gray-600 hover:bg-gray-300   hover:text-gray-700 transition-colors duration-300 transform"
